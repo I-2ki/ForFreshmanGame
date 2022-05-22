@@ -6,6 +6,9 @@ final int SPACE_NUMBER_Y = 8;
 final int SPACE_SIZE = 50;
 String[][] space_state = new String[SPACE_NUMBER_Y][SPACE_NUMBER_X];
 
+String nowTurn = "white";
+boolean canPressMouse = true;
+
 void setup(){
   size(900,600);
   gameInit();
@@ -31,6 +34,12 @@ void draw(){
       gameBoradUpdate(j,i);
     }
   }
+  if(mousePressed == false){
+    canPressMouse = true;
+  }
+  textSize(30);
+  fill(0);
+  text("nowTurn:"+nowTurn,GAMEBORAD_X + SPACE_SIZE*SPACE_NUMBER_X + 20,GAMEBORAD_Y + 30);
 }
 
 void gameBoradDisplay(int yIndex,int xIndex){
@@ -53,8 +62,18 @@ void gameBoradDisplay(int yIndex,int xIndex){
 void gameBoradUpdate(int yIndex,int xIndex){
   int topLeftX = SPACE_SIZE*yIndex+GAMEBORAD_X;
   int topLeftY = SPACE_SIZE*xIndex+GAMEBORAD_Y;
-  if(isOnMouseRect(topLeftX,topLeftY,SPACE_SIZE,SPACE_SIZE) && mousePressed){
-    space_state[yIndex][xIndex] = "white";
+  if(isOnMouseRect(topLeftX,topLeftY,SPACE_SIZE,SPACE_SIZE) && mousePressed && canPressMouse){
+    space_state[yIndex][xIndex] = nowTurn;
+    changeNowTurn();
+    canPressMouse = false;
+  }
+}
+
+void changeNowTurn(){
+  if(nowTurn == "white"){
+    nowTurn = "black";
+  }else{
+    nowTurn = "white";
   }
 }
 
