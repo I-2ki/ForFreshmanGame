@@ -6,8 +6,15 @@ final int SPACE_NUMBER_Y = 8;
 final int SPACE_SIZE = 50;
 String[][] spaceState = new String[SPACE_NUMBER_Y][SPACE_NUMBER_X];
 
-String nowTurn = "white";
+String nowTurn;
 boolean canPressMouse = true;
+
+int passCount = 0;
+
+int numOfWhite;
+int numOfBlack;
+
+String gameState = "gamePlay";
 
 void setup(){
   size(900,600);
@@ -24,9 +31,23 @@ void gameInit(){
   spaceState[3][4] = "black";
   spaceState[4][3] = "black";
   spaceState[4][4] = "white";
+  
+  nowTurn = "black";
+  
+  numOfWhite = getNumOfColor("white");
+  numOfBlack = getNumOfColor("black");
 }
 
 void draw(){
+  if(gameState == "gamePlay"){
+    whenGamePlay();
+  }
+  if(gameState == "gameFinished"){
+    whenGameFinished();
+  }
+}
+
+void whenGamePlay(){
   background(255);
   for(int i = 0;i < SPACE_NUMBER_Y;i++){
     for(int j = 0;j < SPACE_NUMBER_X;j++){
@@ -37,9 +58,46 @@ void draw(){
   if(mousePressed == false){
     canPressMouse = true;
   }
+  if(shouldPass()){
+    nowTurn = getReverseTurn();
+    passCount++;
+  }else{
+    passCount = 0;
+  }
+  
+  if(2 <= passCount||isFinished()){
+    gameState = "gameFinished";
+  }
+  
   textSize(30);
   fill(0);
   text("nowTurn:"+nowTurn,GAMEBORAD_X + SPACE_SIZE*SPACE_NUMBER_X + 20,GAMEBORAD_Y + 30);
+  text("white:"+numOfWhite,GAMEBORAD_X + SPACE_SIZE*SPACE_NUMBER_X + 20,GAMEBORAD_Y + 60);
+  text("black:"+numOfBlack,GAMEBORAD_X + SPACE_SIZE*SPACE_NUMBER_X + 20,GAMEBORAD_Y + 90);
+}
+
+void whenGameFinished(){
+  background(255);
+  textSize(50);
+  if(numOfWhite < numOfBlack){
+    centerText("Black Win!!!",500);
+  }
+  if(numOfWhite > numOfBlack){
+    centerText("White Win!!!",500);
+  }
+  if(numOfWhite == numOfBlack){
+    centerText("Draw!!!",500);
+  }
+  textSize(25);
+  centerText("PressAnyKeyNewGame",300);
+  if(keyPressed){
+    gameInit();
+    gameState = "gamePlay";
+  }
+}
+
+void centerText(String text,int y){
+  text(text,width/2 - textWidth(text)/2,y);
 }
 
 void gameBoradDisplay(int yIndex,int xIndex){
@@ -67,6 +125,9 @@ void gameBoradUpdate(int yIndex,int xIndex){
     putDown(yIndex,xIndex);
     nowTurn = getReverseTurn();
     canPressMouse = false;
+    
+    numOfWhite = getNumOfColor("white");
+    numOfBlack = getNumOfColor("black");
   }
 }
 
@@ -134,5 +195,40 @@ void reverseAboutOneDirection(int yIndex,int xIndex,int yVector,int xVector){
       xIndex += xVector;
       yIndex += yVector;
     }
-  } 
+  }
+}
+
+boolean shouldPass(){
+  for(int i = 0;i < SPACE_NUMBER_Y;i++){
+    for(int j = 0;j < SPACE_NUMBER_X;j++){
+      if(canPutDown(j,i)){
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+int getNumOfColor(String _color){
+  int numOfColor = 0;
+  for(int i = 0;i < SPACE_NUMBER_Y;i++){
+    for(int j = 0;j < SPACE_NUMBER_X;j++){
+      if(spaceState[j][i] == _color){
+        numOfColor ++;
+      }
+    }
+  }
+  return numOfColor;
+}
+
+boolean isFinished(){
+  
+  for(int i = 0;i < SPACE_NUMBER_Y;i++){
+    for(int j = 0;j < SPACE_NUMBER_X;j++){
+      if(spaceState[j][i] == "empty"){
+        return false;
+      }
+    }
+  }
+  return true;
 }
