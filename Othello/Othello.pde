@@ -16,14 +16,14 @@ int numberOfBlack;
 String gameState = "play";
 
 void setup(){
-  size(900,600);
+  size(1000,600);
   gameInit();
 }
 
 void gameInit(){
   for(int i = 0;i < NUMBER_OF_SQUARE_Y;i++){
     for(int j = 0;j < NUMBER_OF_SQUARE_X;j++){
-      squareStates[j][i] = "empty";
+      squareStates[i][j] = "empty";
     }
   }
   squareStates[3][3] = "white";
@@ -94,8 +94,8 @@ void drawTextCenter(String text,int y){
 void gameBoradDisplay(){
   for(int yIndex = 0;yIndex < NUMBER_OF_SQUARE_Y;yIndex++){
     for(int xIndex = 0;xIndex < NUMBER_OF_SQUARE_X;xIndex++){
-      int topLeftX = SQUARE_SIZE * yIndex + GAMEBORAD_X;
-      int topLeftY = SQUARE_SIZE * xIndex + GAMEBORAD_Y;
+      int topLeftX = SQUARE_SIZE * xIndex + GAMEBORAD_X;
+      int topLeftY = SQUARE_SIZE * yIndex + GAMEBORAD_Y;
       fill(5,77,0);
       rect(topLeftX,topLeftY,SQUARE_SIZE,SQUARE_SIZE);
       if(squareStates[yIndex][xIndex] == "empty"){
@@ -115,8 +115,8 @@ void gameBoradDisplay(){
 void gameBoradUpdate(){
   for(int yIndex = 0;yIndex < NUMBER_OF_SQUARE_Y;yIndex++){
     for(int xIndex = 0;xIndex < NUMBER_OF_SQUARE_X;xIndex++){
-      int topLeftX = SQUARE_SIZE * yIndex + GAMEBORAD_X;
-      int topLeftY = SQUARE_SIZE * xIndex + GAMEBORAD_Y;
+      int topLeftX = SQUARE_SIZE * xIndex + GAMEBORAD_X;
+      int topLeftY = SQUARE_SIZE * yIndex + GAMEBORAD_Y;
       
       boolean isClicked = mousePressed && canDetectMouse && isMouseOnRect(topLeftX,topLeftY,SQUARE_SIZE,SQUARE_SIZE);
       if(isClicked && canPutDown(yIndex,xIndex)){
@@ -179,7 +179,7 @@ boolean canPutDown(int yIndex,int xIndex){
   }
   for(int i = -1;i < 2;i++){
     for(int j = -1;j < 2;j++){
-      if(canPutAboutOneDirection(yIndex,xIndex,j,i)){
+      if(canPutAboutOneDirection(yIndex,xIndex,i,j)){
         return true;
       }
     }
@@ -209,7 +209,7 @@ void reverseAboutOneDirection(int yIndex,int xIndex,int yVector,int xVector){
 boolean shouldPass(){
   for(int i = 0;i < NUMBER_OF_SQUARE_Y;i++){
     for(int j = 0;j < NUMBER_OF_SQUARE_X;j++){
-      if(canPutDown(j,i)){
+      if(canPutDown(i,j)){
         return false;
       }
     }
@@ -221,7 +221,7 @@ int countNumberOf(String colorName){
   int numberOfColor = 0;
   for(int i = 0;i < NUMBER_OF_SQUARE_Y;i++){
     for(int j = 0;j < NUMBER_OF_SQUARE_X;j++){
-      if(squareStates[j][i] == colorName){
+      if(squareStates[i][j] == colorName){
         numberOfColor++;
       }
     }
