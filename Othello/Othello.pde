@@ -1,20 +1,19 @@
 final int GAMEBORAD_X = 100;
 final int GAMEBORAD_Y = 100;
 
-final int SPACE_NUMBER_X = 8;
-final int SPACE_NUMBER_Y = 8;
-final int SPACE_SIZE = 50;
-String[][] spaceState = new String[SPACE_NUMBER_Y][SPACE_NUMBER_X];
+final int NUMBER_OF_SQUARE_X = 8;
+final int NUMBER_OF_SQUARE_Y = 8;
+final int SQUARE_SIZE = 50;
+String[][] squareStates = new String[NUMBER_OF_SQUARE_Y][NUMBER_OF_SQUARE_X];
 
-String nowTurn;
-boolean canPressMouse = true;
+String nowPlayerColor;
+boolean canDetectMouse = true;
 
-int passCount = 0;
+int numberOfPass = 0;
+int numberOfWhite;
+int numberOfBlack;
 
-int numOfWhite;
-int numOfBlack;
-
-String gameState = "gamePlay";
+String gameState = "play";
 
 void setup(){
   size(900,600);
@@ -22,149 +21,160 @@ void setup(){
 }
 
 void gameInit(){
-  for(int i = 0;i < SPACE_NUMBER_Y;i++){
-    for(int j = 0;j < SPACE_NUMBER_X;j++){
-      spaceState[j][i] = "empty";
+  for(int i = 0;i < NUMBER_OF_SQUARE_Y;i++){
+    for(int j = 0;j < NUMBER_OF_SQUARE_X;j++){
+      squareStates[j][i] = "empty";
     }
   }
-  spaceState[3][3] = "white";
-  spaceState[3][4] = "black";
-  spaceState[4][3] = "black";
-  spaceState[4][4] = "white";
+  squareStates[3][3] = "white";
+  squareStates[3][4] = "black";
+  squareStates[4][3] = "black";
+  squareStates[4][4] = "white";
   
-  nowTurn = "black";
+  nowPlayerColor = "black";
   
-  numOfWhite = getNumOfColor("white");
-  numOfBlack = getNumOfColor("black");
+  numberOfWhite = countNumberOf("white");
+  numberOfBlack = countNumberOf("black");
 }
 
 void draw(){
-  if(gameState == "gamePlay"){
-    whenGamePlay();
-  }
-  if(gameState == "gameFinished"){
-    whenGameFinished();
+  switch(gameState){
+    case "play":
+      gamePlay();
+      break;
+    case "result":
+      gameResult();
+      break;
+    default:
+      println("メッセージは出ないはずだよ");
+      break;
   }
 }
 
-void whenGamePlay(){
+void gamePlay(){
   background(255);
-  for(int i = 0;i < SPACE_NUMBER_Y;i++){
-    for(int j = 0;j < SPACE_NUMBER_X;j++){
-      gameBoradDisplay(j,i);
-      gameBoradUpdate(j,i);
-    }
-  }
+  gameBoradDisplay();
+  gameBoradUpdate();
   if(mousePressed == false){
-    canPressMouse = true;
-  }
-  if(shouldPass()){
-    nowTurn = getReverseTurn();
-    passCount++;
-  }else{
-    passCount = 0;
-  }
-  
-  if(2 <= passCount||isFinished()){
-    gameState = "gameFinished";
+    canDetectMouse = true;
   }
   
   textSize(30);
   fill(0);
-  text("nowTurn:"+nowTurn,GAMEBORAD_X + SPACE_SIZE*SPACE_NUMBER_X + 20,GAMEBORAD_Y + 30);
-  text("white:"+numOfWhite,GAMEBORAD_X + SPACE_SIZE*SPACE_NUMBER_X + 20,GAMEBORAD_Y + 60);
-  text("black:"+numOfBlack,GAMEBORAD_X + SPACE_SIZE*SPACE_NUMBER_X + 20,GAMEBORAD_Y + 90);
+  text("nowPlayerColor:"+nowPlayerColor,GAMEBORAD_X + SQUARE_SIZE*NUMBER_OF_SQUARE_X + 20,GAMEBORAD_Y + 30);
+  text("white:"+numberOfWhite,GAMEBORAD_X + SQUARE_SIZE*NUMBER_OF_SQUARE_X + 20,GAMEBORAD_Y + 60);
+  text("black:"+numberOfBlack,GAMEBORAD_X + SQUARE_SIZE*NUMBER_OF_SQUARE_X + 20,GAMEBORAD_Y + 90);
 }
 
-void whenGameFinished(){
+void gameResult(){
   background(255);
   textSize(50);
-  if(numOfWhite < numOfBlack){
-    centerText("Black Win!!!",500);
+  String resultMessage;
+  if(numberOfWhite == numberOfBlack){
+    resultMessage = "Draw game";
+  }else if(numberOfWhite >= numberOfBlack){
+    resultMessage = "White win!";
+  }else{
+    resultMessage = "Black win";
   }
-  if(numOfWhite > numOfBlack){
-    centerText("White Win!!!",500);
-  }
-  if(numOfWhite == numOfBlack){
-    centerText("Draw!!!",500);
-  }
+  drawTextCenter(resultMessage,500);
   textSize(25);
-  centerText("PressAnyKeyNewGame",300);
-  if(keyPressed){
+  drawTextCenter("New game with z key",300);
+  
+  if(keyPressed && key == 'z'){
     gameInit();
-    gameState = "gamePlay";
+    gameState = "play";
   }
 }
 
-void centerText(String text,int y){
+void drawTextCenter(String text,int y){
   text(text,width/2 - textWidth(text)/2,y);
 }
 
-void gameBoradDisplay(int yIndex,int xIndex){
-  int topLeftX = SPACE_SIZE*yIndex+GAMEBORAD_X;
-  int topLeftY = SPACE_SIZE*xIndex+GAMEBORAD_Y;
-  fill(5,77,0);
-  rect(topLeftX,topLeftY,SPACE_SIZE,SPACE_SIZE);
-  if(spaceState[yIndex][xIndex] == "empty"){
-    return;
-  }
-  if(spaceState[yIndex][xIndex] == "white"){
-    fill(255);
-  }
-  if(spaceState[yIndex][xIndex] == "black"){
-    fill(0);
-  }
-  ellipse(topLeftX + SPACE_SIZE/2,topLeftY + SPACE_SIZE/2,SPACE_SIZE * 0.8,SPACE_SIZE * 0.8);
-}
-
-void gameBoradUpdate(int yIndex,int xIndex){
-  int topLeftX = SPACE_SIZE * yIndex + GAMEBORAD_X;
-  int topLeftY = SPACE_SIZE * xIndex + GAMEBORAD_Y;
-  boolean isClicked = isOnMouseRect(topLeftX,topLeftY,SPACE_SIZE,SPACE_SIZE) && mousePressed && canPressMouse;
-  if(isClicked && canPutDown(yIndex,xIndex)){
-    putDown(yIndex,xIndex);
-    nowTurn = getReverseTurn();
-    canPressMouse = false;
-    
-    numOfWhite = getNumOfColor("white");
-    numOfBlack = getNumOfColor("black");
+void gameBoradDisplay(){
+  for(int yIndex = 0;yIndex < NUMBER_OF_SQUARE_Y;yIndex++){
+    for(int xIndex = 0;xIndex < NUMBER_OF_SQUARE_X;xIndex++){
+      int topLeftX = SQUARE_SIZE * yIndex + GAMEBORAD_X;
+      int topLeftY = SQUARE_SIZE * xIndex + GAMEBORAD_Y;
+      fill(5,77,0);
+      rect(topLeftX,topLeftY,SQUARE_SIZE,SQUARE_SIZE);
+      if(squareStates[yIndex][xIndex] == "empty"){
+        continue;
+      }
+      if(squareStates[yIndex][xIndex] == "white"){
+        fill(255);
+      }
+      if(squareStates[yIndex][xIndex] == "black"){
+        fill(0);
+      }
+      ellipse(topLeftX + SQUARE_SIZE/2,topLeftY + SQUARE_SIZE/2,SQUARE_SIZE * 0.8,SQUARE_SIZE * 0.8);
+    }
   }
 }
 
-String getReverseTurn(){
-  if(nowTurn == "white"){
+void gameBoradUpdate(){
+  for(int yIndex = 0;yIndex < NUMBER_OF_SQUARE_Y;yIndex++){
+    for(int xIndex = 0;xIndex < NUMBER_OF_SQUARE_X;xIndex++){
+      int topLeftX = SQUARE_SIZE * yIndex + GAMEBORAD_X;
+      int topLeftY = SQUARE_SIZE * xIndex + GAMEBORAD_Y;
+      
+      boolean isClicked = mousePressed && canDetectMouse && isMouseOnRect(topLeftX,topLeftY,SQUARE_SIZE,SQUARE_SIZE);
+      if(isClicked && canPutDown(yIndex,xIndex)){
+        putStone(yIndex,xIndex);
+        nowPlayerColor = getEnemyColor();
+        canDetectMouse = false;
+        
+        numberOfWhite = countNumberOf("white");
+        numberOfBlack = countNumberOf("black");
+        
+        if(shouldPass()){
+          nowPlayerColor = getEnemyColor();
+          if(shouldPass()){
+            gameState = "result";
+          }
+        }
+      }
+    }
+  }
+}
+
+String getEnemyColor(){
+  if(nowPlayerColor == "white"){
     return "black";
   }else{
     return "white";
   }
 }
 
-boolean isOnMouseRect(float x,float y,int w,int h){
+boolean isMouseOnRect(float x,float y,int w,int h){
   return ((x < mouseX)&&(mouseX < x + w)&&(y < mouseY)&&(mouseY < y + h));
 }
 
 boolean canPutAboutOneDirection(int yIndex,int xIndex,int yVector,int xVector){
-  int count = 0;
+  if(xVector == 0 && yVector == 0){
+    return false;
+  }
+  int numberOfReversible = -1;
   do{
-    count++;
+    numberOfReversible++;
     xIndex += xVector;
     yIndex += yVector;
-    if(xIndex < 0 || SPACE_NUMBER_X <= xIndex || yIndex < 0 || SPACE_NUMBER_Y <= yIndex){
+    if(xIndex < 0 || NUMBER_OF_SQUARE_X <= xIndex || yIndex < 0 || NUMBER_OF_SQUARE_Y <= yIndex){
       return false;
     }
   }
-  while(spaceState[yIndex][xIndex] == getReverseTurn());
-  if(count <= 1){
+  while(squareStates[yIndex][xIndex] == getEnemyColor());
+  if(numberOfReversible <= 0){
     return false;
   }
-  if(spaceState[yIndex][xIndex] == nowTurn){
+  if(squareStates[yIndex][xIndex] == nowPlayerColor){
     return true;
   }
   return false;
 }
 
 boolean canPutDown(int yIndex,int xIndex){
-  if(spaceState[yIndex][xIndex] != "empty"){
+  if(squareStates[yIndex][xIndex] != "empty"){
     return false;
   }
   for(int i = -1;i < 2;i++){
@@ -177,8 +187,8 @@ boolean canPutDown(int yIndex,int xIndex){
   return false;
 }
 
-void putDown(int yIndex,int xIndex){
-  spaceState[yIndex][xIndex] = nowTurn;
+void putStone(int yIndex,int xIndex){
+  squareStates[yIndex][xIndex] = nowPlayerColor;
   for(int i = -1;i < 2;i++){
     for(int j = -1;j < 2;j++){
       reverseAboutOneDirection(yIndex,xIndex,j,i);
@@ -188,19 +198,17 @@ void putDown(int yIndex,int xIndex){
 
 void reverseAboutOneDirection(int yIndex,int xIndex,int yVector,int xVector){
   if(canPutAboutOneDirection(yIndex,xIndex,yVector,xVector)){
-    xIndex += xVector;
-    yIndex += yVector;
-    while(spaceState[yIndex][xIndex] != nowTurn){
-      spaceState[yIndex][xIndex] = nowTurn;
+    while(squareStates[yIndex + yVector][xIndex + xVector] != nowPlayerColor){
       xIndex += xVector;
       yIndex += yVector;
+      squareStates[yIndex][xIndex] = nowPlayerColor;
     }
   }
 }
 
 boolean shouldPass(){
-  for(int i = 0;i < SPACE_NUMBER_Y;i++){
-    for(int j = 0;j < SPACE_NUMBER_X;j++){
+  for(int i = 0;i < NUMBER_OF_SQUARE_Y;i++){
+    for(int j = 0;j < NUMBER_OF_SQUARE_X;j++){
       if(canPutDown(j,i)){
         return false;
       }
@@ -209,26 +217,14 @@ boolean shouldPass(){
   return true;
 }
 
-int getNumOfColor(String _color){
-  int numOfColor = 0;
-  for(int i = 0;i < SPACE_NUMBER_Y;i++){
-    for(int j = 0;j < SPACE_NUMBER_X;j++){
-      if(spaceState[j][i] == _color){
-        numOfColor ++;
+int countNumberOf(String colorName){
+  int numberOfColor = 0;
+  for(int i = 0;i < NUMBER_OF_SQUARE_Y;i++){
+    for(int j = 0;j < NUMBER_OF_SQUARE_X;j++){
+      if(squareStates[j][i] == colorName){
+        numberOfColor++;
       }
     }
   }
-  return numOfColor;
-}
-
-boolean isFinished(){
-  
-  for(int i = 0;i < SPACE_NUMBER_Y;i++){
-    for(int j = 0;j < SPACE_NUMBER_X;j++){
-      if(spaceState[j][i] == "empty"){
-        return false;
-      }
-    }
-  }
-  return true;
+  return numberOfColor;
 }
