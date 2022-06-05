@@ -38,16 +38,10 @@ void gameInit(){
 }
 
 void draw(){
-  switch(gameState){
-    case "play":
-      gamePlay();
-      break;
-    case "result":
-      gameResult();
-      break;
-    default:
-      println("メッセージは出ないはずだよ");
-      break;
+  if(gameState == "play"){
+    gamePlay();
+  }else{
+    gameResult();
   }
 }
 
