@@ -9,7 +9,6 @@ String[][] squareStates = new String[NUMBER_OF_SQUARE_Y][NUMBER_OF_SQUARE_X];
 String nowPlayerColor;
 boolean canDetectMouse = true;
 
-int numberOfPass = 0;
 int numberOfWhite;
 int numberOfBlack;
 
