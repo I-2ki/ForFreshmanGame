@@ -4,7 +4,7 @@ final int GAMEBORAD_Y = 100;
 final int NUMBER_OF_SQUARE_X = 8;
 final int NUMBER_OF_SQUARE_Y = 8;
 final int SQUARE_SIZE = 50;
-String[][] squareStates = new String[NUMBER_OF_SQUARE_Y][NUMBER_OF_SQUARE_X];
+String[][] squareStates = new String[NUMBER_OF_SQUARE_X][NUMBER_OF_SQUARE_Y];
 
 String nowPlayerColor;
 boolean canDetectMouse = true;
@@ -22,7 +22,7 @@ void setup(){
 void gameInit(){
   for(int i = 0;i < NUMBER_OF_SQUARE_Y;i++){
     for(int j = 0;j < NUMBER_OF_SQUARE_X;j++){
-      squareStates[i][j] = "empty";
+      squareStates[j][i] = "empty";
     }
   }
   squareStates[3][3] = "white";
@@ -91,13 +91,13 @@ void gameBoradDisplay(){
       int topLeftY = SQUARE_SIZE * yIndex + GAMEBORAD_Y;
       fill(5,77,0);
       rect(topLeftX,topLeftY,SQUARE_SIZE,SQUARE_SIZE);
-      if(squareStates[yIndex][xIndex] == "empty"){
+      if(squareStates[xIndex][yIndex] == "empty"){
         continue;
       }
-      if(squareStates[yIndex][xIndex] == "white"){
+      if(squareStates[xIndex][yIndex] == "white"){
         fill(255);
       }
-      if(squareStates[yIndex][xIndex] == "black"){
+      if(squareStates[xIndex][yIndex] == "black"){
         fill(0);
       }
       ellipse(topLeftX + SQUARE_SIZE/2,topLeftY + SQUARE_SIZE/2,SQUARE_SIZE * 0.8,SQUARE_SIZE * 0.8);
@@ -112,21 +112,25 @@ void gameBoradUpdate(){
       int topLeftY = SQUARE_SIZE * yIndex + GAMEBORAD_Y;
       
       boolean isClicked = mousePressed && canDetectMouse && isMouseOnRect(topLeftX,topLeftY,SQUARE_SIZE,SQUARE_SIZE);
-      if(isClicked && canPutDown(yIndex,xIndex)){
-        putStone(yIndex,xIndex);
-        nowPlayerColor = getEnemyColor();
-        canDetectMouse = false;
-        
-        numberOfWhite = countNumberOf("white");
-        numberOfBlack = countNumberOf("black");
-        
-        if(shouldPass()){
-          nowPlayerColor = getEnemyColor();
-          if(shouldPass()){
-            gameState = "result";
-          }
-        }
+      if(isClicked && canPutDown(xIndex,yIndex)){
+        putStone(xIndex,yIndex);
+        whenTurnChange();
       }
+    }
+  }
+}
+
+void whenTurnChange(){
+  nowPlayerColor = getEnemyColor();
+  canDetectMouse = false;
+    
+  numberOfWhite = countNumberOf("white");
+  numberOfBlack = countNumberOf("black");
+    
+  if(shouldPass()){
+    nowPlayerColor = getEnemyColor();
+    if(shouldPass()){
+      gameState = "result";
     }
   }
 }
@@ -143,7 +147,7 @@ boolean isMouseOnRect(float x,float y,int w,int h){
   return ((x < mouseX)&&(mouseX < x + w)&&(y < mouseY)&&(mouseY < y + h));
 }
 
-boolean canPutAboutOneDirection(int yIndex,int xIndex,int yVector,int xVector){
+boolean canPutAboutOneDirection(int xIndex,int yIndex,int xVector,int yVector){
   if(xVector == 0 && yVector == 0){
     return false;
   }
@@ -156,23 +160,23 @@ boolean canPutAboutOneDirection(int yIndex,int xIndex,int yVector,int xVector){
       return false;
     }
   }
-  while(squareStates[yIndex][xIndex] == getEnemyColor());
+  while(squareStates[xIndex][yIndex] == getEnemyColor());
   if(numberOfReversible <= 0){
     return false;
   }
-  if(squareStates[yIndex][xIndex] == nowPlayerColor){
+  if(squareStates[xIndex][yIndex] == nowPlayerColor){
     return true;
   }
   return false;
 }
 
-boolean canPutDown(int yIndex,int xIndex){
-  if(squareStates[yIndex][xIndex] != "empty"){
+boolean canPutDown(int xIndex,int yIndex){
+  if(squareStates[xIndex][yIndex] != "empty"){
     return false;
   }
   for(int i = -1;i < 2;i++){
     for(int j = -1;j < 2;j++){
-      if(canPutAboutOneDirection(yIndex,xIndex,i,j)){
+      if(canPutAboutOneDirection(xIndex,yIndex,j,i)){
         return true;
       }
     }
@@ -180,21 +184,21 @@ boolean canPutDown(int yIndex,int xIndex){
   return false;
 }
 
-void putStone(int yIndex,int xIndex){
-  squareStates[yIndex][xIndex] = nowPlayerColor;
+void putStone(int xIndex,int yIndex){
+  squareStates[xIndex][yIndex] = nowPlayerColor;
   for(int i = -1;i < 2;i++){
     for(int j = -1;j < 2;j++){
-      reverseAboutOneDirection(yIndex,xIndex,j,i);
+      reverseAboutOneDirection(xIndex,yIndex,j,i);
     }
   }
 }
 
-void reverseAboutOneDirection(int yIndex,int xIndex,int yVector,int xVector){
-  if(canPutAboutOneDirection(yIndex,xIndex,yVector,xVector)){
-    while(squareStates[yIndex + yVector][xIndex + xVector] != nowPlayerColor){
+void reverseAboutOneDirection(int xIndex,int yIndex,int xVector,int yVector){
+  if(canPutAboutOneDirection(xIndex,yIndex,xVector,yVector)){
+    while(squareStates[xIndex + xVector][yIndex + yVector] != nowPlayerColor){
       xIndex += xVector;
       yIndex += yVector;
-      squareStates[yIndex][xIndex] = nowPlayerColor;
+      squareStates[xIndex][yIndex] = nowPlayerColor;
     }
   }
 }
@@ -202,7 +206,7 @@ void reverseAboutOneDirection(int yIndex,int xIndex,int yVector,int xVector){
 boolean shouldPass(){
   for(int i = 0;i < NUMBER_OF_SQUARE_Y;i++){
     for(int j = 0;j < NUMBER_OF_SQUARE_X;j++){
-      if(canPutDown(i,j)){
+      if(canPutDown(j,i)){
         return false;
       }
     }
@@ -214,7 +218,7 @@ int countNumberOf(String colorName){
   int numberOfColor = 0;
   for(int i = 0;i < NUMBER_OF_SQUARE_Y;i++){
     for(int j = 0;j < NUMBER_OF_SQUARE_X;j++){
-      if(squareStates[i][j] == colorName){
+      if(squareStates[j][i] == colorName){
         numberOfColor++;
       }
     }
