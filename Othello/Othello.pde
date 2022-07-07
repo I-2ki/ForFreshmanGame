@@ -4,7 +4,7 @@ final int GAMEBORAD_Y = 100;
 final int NUMBER_OF_SQUARE_X = 8;
 final int NUMBER_OF_SQUARE_Y = 8;
 final int SQUARE_SIZE = 50;
-String[][] squareStates = new String[NUMBER_OF_SQUARE_X][NUMBER_OF_SQUARE_Y];
+String[][] squareStates = new String[NUMBER_OF_SQUARE_Y][NUMBER_OF_SQUARE_X];
 
 String nowPlayerColor;
 boolean canDetectMouse = true;
@@ -22,7 +22,7 @@ void setup(){
 void gameInit(){
   for(int i = 0;i < NUMBER_OF_SQUARE_Y;i++){
     for(int j = 0;j < NUMBER_OF_SQUARE_X;j++){
-      squareStates[j][i] = "empty";
+      squareStates[i][j] = "empty";
     }
   }
   squareStates[3][3] = "white";
@@ -91,13 +91,13 @@ void gameBoradDisplay(){
       int topLeftY = SQUARE_SIZE * yIndex + GAMEBORAD_Y;
       fill(5,77,0);
       rect(topLeftX,topLeftY,SQUARE_SIZE,SQUARE_SIZE);
-      if(squareStates[xIndex][yIndex] == "empty"){
+      if(squareStates[yIndex][xIndex] == "empty"){
         continue;
       }
-      if(squareStates[xIndex][yIndex] == "white"){
+      if(squareStates[yIndex][xIndex] == "white"){
         fill(255);
       }
-      if(squareStates[xIndex][yIndex] == "black"){
+      if(squareStates[yIndex][xIndex] == "black"){
         fill(0);
       }
       ellipse(topLeftX + SQUARE_SIZE/2,topLeftY + SQUARE_SIZE/2,SQUARE_SIZE * 0.8,SQUARE_SIZE * 0.8);
@@ -160,18 +160,18 @@ boolean canPutAboutOneDirection(int xIndex,int yIndex,int xVector,int yVector){
       return false;
     }
   }
-  while(squareStates[xIndex][yIndex] == getEnemyColor());
+  while(squareStates[yIndex][xIndex] == getEnemyColor());
   if(numberOfReversible <= 0){
     return false;
   }
-  if(squareStates[xIndex][yIndex] == nowPlayerColor){
+  if(squareStates[yIndex][xIndex] == nowPlayerColor){
     return true;
   }
   return false;
 }
 
 boolean canPutDown(int xIndex,int yIndex){
-  if(squareStates[xIndex][yIndex] != "empty"){
+  if(squareStates[yIndex][xIndex] != "empty"){
     return false;
   }
   for(int i = -1;i < 2;i++){
@@ -185,7 +185,7 @@ boolean canPutDown(int xIndex,int yIndex){
 }
 
 void putStone(int xIndex,int yIndex){
-  squareStates[xIndex][yIndex] = nowPlayerColor;
+  squareStates[yIndex][xIndex] = nowPlayerColor;
   for(int i = -1;i < 2;i++){
     for(int j = -1;j < 2;j++){
       reverseAboutOneDirection(xIndex,yIndex,j,i);
@@ -195,10 +195,10 @@ void putStone(int xIndex,int yIndex){
 
 void reverseAboutOneDirection(int xIndex,int yIndex,int xVector,int yVector){
   if(canPutAboutOneDirection(xIndex,yIndex,xVector,yVector)){
-    while(squareStates[xIndex + xVector][yIndex + yVector] != nowPlayerColor){
+    while(squareStates[yIndex + yVector][xIndex + xVector] != nowPlayerColor){
       xIndex += xVector;
       yIndex += yVector;
-      squareStates[xIndex][yIndex] = nowPlayerColor;
+      squareStates[yIndex][xIndex] = nowPlayerColor;
     }
   }
 }
@@ -218,7 +218,7 @@ int countNumberOf(String colorName){
   int numberOfColor = 0;
   for(int i = 0;i < NUMBER_OF_SQUARE_Y;i++){
     for(int j = 0;j < NUMBER_OF_SQUARE_X;j++){
-      if(squareStates[j][i] == colorName){
+      if(squareStates[i][j] == colorName){
         numberOfColor++;
       }
     }
